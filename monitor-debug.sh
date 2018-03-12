@@ -22,8 +22,8 @@ figgletize () {
   state=$1
   detailtype=$2
   stage=$3
-  figlet -f doh.flf -w 180 $stage |head -n 19 |sed -n '2!p'
-  figlet -f doh.flf -w 180 $state |head -n 19 |sed -n '2!p'
+  figlet -f doh.flf -w 180 $stage |head -n 18
+  figlet -f doh.flf -w 180 $state |head -n 18 |sed -n '2!p'
   #echo "Change:" $detailtype
   #echo "State:" $state
 }
@@ -64,7 +64,7 @@ do
   #echo "detail-type:" $detailtype
   #echo "state:" $state
   if [[ "$state" == "FAILED" ]] || [[ "$state" == "STARTED" ]] || [[ "$state" == "SUCCEEDED" ]]; then
-    echo "=$previousstate=" ---- "=$state=" 
+    #echo "=$previousstate=" ---- "=$state=" 
     if [[ $state != $previousstate ]]; then
       #echo STATES ARE DIFFERENT, TRIGERRING LAMP WITH $state
       pipelinelight $stage $state
