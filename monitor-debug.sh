@@ -17,36 +17,49 @@ alias pipelinesucceeded=green
 # Script execution starts here...
 
 # sed "s/\\\//g" # remove escapes
+
+figgletize () {
+  state=$1
+  detailtype=$2
+  figlet -f doh.flf -w 180 $state |head -n 19 |sed -n '1!p'
+  echo "Change:" $detailtype
+  #echo "State:" $state
+}
+
+pipelinelight () {
+  state=$1
+  if [[ "$state" == "FAILED" ]]; then
+    #pipelinefail
+    echo -e "\033[91m"
+    figgletize $state $detailtype
+    echo -e "\033[0m"
+  fi
+  if [[ "$state" == "STARTED" ]]; then
+    echo -e "\033[94m"
+    figgletize $state $detailtype
+    echo -e "\033[0m"
+    #pipelinestart
+  fi
+  if [[ "$state" == "SUCCEEDED" ]]; then
+    echo -e "\033[92m"
+    figgletize "SUCCESS" $detailtype
+    echo -e "\033[0m"
+    #pipelinesucceeded
+  fi
+}
 while true
 do
   msg=$(aws sqs receive-message --queue-url $queueurl |jq '.Messages[].Body' | sed "s/\\\//g")
-  #msg='"{"version":"0","id":"2ceb5e18-b856-8405-be9a-46f1d44628c2","detail-type":"AWS API Call via CloudTrail","source":"aws.codepipeline","account":"612895797421","time":"2018-03-09T01:13:47Z","region":"us-west-2","resources":[],"detail":{"eventVersion":"1.05","userIdentity":{"type":"AssumedRole","principalId":"AROAIRMHUBVPRMPLSD5VU:sayersr-Isengard","arn":"arn:aws:sts::612895797421:assumed-role/Admin/sayersr-Isengard","accountId":"612895797421","accessKeyId":"ASIAJYFE5OOT7SXHIXNA","sessionContext":{"attributes":{"mfaAuthenticated":"false","creationDate":"2018-03-08T20:53:55Z"},"sessionIssuer":{"type":"Role","principalId":"AROAIRMHUBVPRMPLSD5VU","arn":"arn:aws:iam::612895797421:role/Admin","accountId":"612895797421","userName":"Admin"}}},"eventTime":"2018-03-09T01:13:47Z","eventSource":"codepipeline.amazonaws.com","eventName":"UpdatePipeline","awsRegion":"us-west-2","sourceIPAddress":"205.251.233.178","userAgent":"aws-internal/3","requestParameters":{"pipeline":{"version":1,"name":"continuous-integration","artifactStore":{"type":"S3","location":"codepipeline-us-west-2-776513347464"},"stages":[{"actions":[{"inputArtifacts":[],"name":"Source","outputArtifacts":[{"name":"MyApp"}],"actionTypeId":{"owner":"AWS","category":"Source","provider":"CodeCommit","version":"1"},"configuration":{"PollForSourceChanges":"false","RepositoryName":"russ-deploying-repo","BranchName":"dev"},"runOrder":1}],"name":"Source"},{"actions":[{"inputArtifacts":[{"name":"MyApp"}],"name":"CodeBuild","outputArtifacts":[{"name":"MyAppBuild"}],"actionTypeId":{"owner":"AWS","category":"Build","provider":"CodeBuild","version":"1"},"configuration":{"ProjectName":"UnitTests"},"runOrder":1}],"name":"Build"},{"actions":[{"inputArtifacts":[{"name":"MyApp"}],"name":"AcceptanceEnv","outputArtifacts":[],"actionTypeId":{"owner":"AWS","category":"Deploy","provider":"CloudFormation","version":"1"},"configuration":{"TemplatePath":"MyApp::templates/edx-provision.yaml","ActionMode":"CREATE_UPDATE","Capabilities":"CAPABILITY_IAM","RoleArn":"arn:aws:iam::612895797421:role/codepipeline-template","StackName":"acceptance"},"runOrder":1}],"name":"Provision"}],"roleArn":"arn:aws:iam::612895797421:role/AWS-CodePipeline-Service"}},"responseElements":{"pipeline":{"version":2,"name":"continuous-integration","artifactStore":{"type":"S3","location":"codepipeline-us-west-2-776513347464"},"stages":[{"actions":[{"inputArtifacts":[],"name":"Source","outputArtifacts":[{"name":"MyApp"}],"actionTypeId":{"owner":"AWS","category":"Source","provider":"CodeCommit","version":"1"},"configuration":{"PollForSourceChanges":"false","RepositoryName":"russ-deploying-repo","BranchName":"dev"},"runOrder":1}],"name":"Source"},{"actions":[{"inputArtifacts":[{"name":"MyApp"}],"name":"CodeBuild","outputArtifacts":[{"name":"MyAppBuild"}],"actionTypeId":{"owner":"AWS","category":"Build","provider":"CodeBuild","version":"1"},"configuration":{"ProjectName":"UnitTests"},"runOrder":1}],"name":"Build"},{"actions":[{"inputArtifacts":[{"name":"MyApp"}],"name":"AcceptanceEnv","outputArtifacts":[],"actionTypeId":{"owner":"AWS","category":"Deploy","provider":"CloudFormation","version":"1"},"configuration":{"TemplatePath":"MyApp::templates/edx-provision.yaml","ActionMode":"CREATE_UPDATE","Capabilities":"CAPABILITY_IAM","RoleArn":"arn:aws:iam::612895797421:role/codepipeline-template","StackName":"acceptance"},"runOrder":1}],"name":"Provision"}],"roleArn":"arn:aws:iam::612895797421:role/AWS-CodePipeline-Service"}},"requestID":"1e4d360b-2337-11e8-a183-eb91fa5d46da","eventID":"d451b1f5-b4cf-443b-987b-83d317ffe96a","eventType":"AwsApiCall"}}"'
   msg2=${msg#"\""}
   msg2=${msg2%"\""}
   msg2=$(echo $msg2 |sed "s/detail-type/detailtype/g")
   detailtype=$(echo $msg2 |jq .detailtype |sed "s/[\"\']//g")
   state=$(echo $msg2 |jq .detail.state |sed "s/[\"\']//g")
-
   #echo "detail-type:" $detailtype
   #echo "state:" $state
-  
-  if [[ "$state" == "FAILED" ]]; then
-    echo "\033[91mChange:" $detailtype
-    echo "State:" $state
-    echo 'Pipeline FAILED - changing bulb behavior\033[0m'
-    pipelinefail
-  fi
-  if [[ "$state" == "STARTED" ]]; then
-    echo "\033[94mChange:" $detailtype
-    echo "State:" $state
-    echo 'Pipeline STARTED - changing bulb behavior\033[0m'
-    pipelinestart
-  fi
-  if [[ "$state" == "SUCCEEDED" ]]; then
-    echo "\033[92mChange:" $detailtype
-    echo "State:" $state
-    echo 'Pipeline SUCCEEDED - changing bulb behavior\033[0m'
-    pipelinesucceeded
-  fi
+  pipelinelight $state
   sleep 1
 done
+
+
+#msg='"{"version":"0","id":"2ceb5e18-b856-8405-be9a-46f1d44628c2","detail-type":"AWS API Call via CloudTrail","source":"aws.codepipeline","account":"612895797421","time":"2018-03-09T01:13:47Z","region":"us-west-2","resources":[],"detail":{"eventVersion":"1.05","userIdentity":{"type":"AssumedRole","principalId":"AROAIRMHUBVPRMPLSD5VU:sayersr-Isengard","arn":"arn:aws:sts::612895797421:assumed-role/Admin/sayersr-Isengard","accountId":"612895797421","accessKeyId":"ASIAJYFE5OOT7SXHIXNA","sessionContext":{"attributes":{"mfaAuthenticated":"false","creationDate":"2018-03-08T20:53:55Z"},"sessionIssuer":{"type":"Role","principalId":"AROAIRMHUBVPRMPLSD5VU","arn":"arn:aws:iam::612895797421:role/Admin","accountId":"612895797421","userName":"Admin"}}},"eventTime":"2018-03-09T01:13:47Z","eventSource":"codepipeline.amazonaws.com","eventName":"UpdatePipeline","awsRegion":"us-west-2","sourceIPAddress":"205.251.233.178","userAgent":"aws-internal/3","requestParameters":{"pipeline":{"version":1,"name":"continuous-integration","artifactStore":{"type":"S3","location":"codepipeline-us-west-2-776513347464"},"stages":[{"actions":[{"inputArtifacts":[],"name":"Source","outputArtifacts":[{"name":"MyApp"}],"actionTypeId":{"owner":"AWS","category":"Source","provider":"CodeCommit","version":"1"},"configuration":{"PollForSourceChanges":"false","RepositoryName":"russ-deploying-repo","BranchName":"dev"},"runOrder":1}],"name":"Source"},{"actions":[{"inputArtifacts":[{"name":"MyApp"}],"name":"CodeBuild","outputArtifacts":[{"name":"MyAppBuild"}],"actionTypeId":{"owner":"AWS","category":"Build","provider":"CodeBuild","version":"1"},"configuration":{"ProjectName":"UnitTests"},"runOrder":1}],"name":"Build"},{"actions":[{"inputArtifacts":[{"name":"MyApp"}],"name":"AcceptanceEnv","outputArtifacts":[],"actionTypeId":{"owner":"AWS","category":"Deploy","provider":"CloudFormation","version":"1"},"configuration":{"TemplatePath":"MyApp::templates/edx-provision.yaml","ActionMode":"CREATE_UPDATE","Capabilities":"CAPABILITY_IAM","RoleArn":"arn:aws:iam::612895797421:role/codepipeline-template","StackName":"acceptance"},"runOrder":1}],"name":"Provision"}],"roleArn":"arn:aws:iam::612895797421:role/AWS-CodePipeline-Service"}},"responseElements":{"pipeline":{"version":2,"name":"continuous-integration","artifactStore":{"type":"S3","location":"codepipeline-us-west-2-776513347464"},"stages":[{"actions":[{"inputArtifacts":[],"name":"Source","outputArtifacts":[{"name":"MyApp"}],"actionTypeId":{"owner":"AWS","category":"Source","provider":"CodeCommit","version":"1"},"configuration":{"PollForSourceChanges":"false","RepositoryName":"russ-deploying-repo","BranchName":"dev"},"runOrder":1}],"name":"Source"},{"actions":[{"inputArtifacts":[{"name":"MyApp"}],"name":"CodeBuild","outputArtifacts":[{"name":"MyAppBuild"}],"actionTypeId":{"owner":"AWS","category":"Build","provider":"CodeBuild","version":"1"},"configuration":{"ProjectName":"UnitTests"},"runOrder":1}],"name":"Build"},{"actions":[{"inputArtifacts":[{"name":"MyApp"}],"name":"AcceptanceEnv","outputArtifacts":[],"actionTypeId":{"owner":"AWS","category":"Deploy","provider":"CloudFormation","version":"1"},"configuration":{"TemplatePath":"MyApp::templates/edx-provision.yaml","ActionMode":"CREATE_UPDATE","Capabilities":"CAPABILITY_IAM","RoleArn":"arn:aws:iam::612895797421:role/codepipeline-template","StackName":"acceptance"},"runOrder":1}],"name":"Provision"}],"roleArn":"arn:aws:iam::612895797421:role/AWS-CodePipeline-Service"}},"requestID":"1e4d360b-2337-11e8-a183-eb91fa5d46da","eventID":"d451b1f5-b4cf-443b-987b-83d317ffe96a","eventType":"AwsApiCall"}}"'
