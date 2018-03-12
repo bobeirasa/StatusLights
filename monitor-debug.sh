@@ -21,29 +21,32 @@ alias pipelinesucceeded=green
 figgletize () {
   state=$1
   detailtype=$2
-  figlet -f doh.flf -w 180 $state |head -n 19 |sed -n '2!p'
+  stage=$3
+  figlet -f doh.flf -w 180 $stage |head -n 17 |sed -n '2!p'
+  figlet -f doh.flf -w 180 $state |head -n 19 |sed -n '3!p'
   echo "Change:" $detailtype
   #echo "State:" $state
 }
 
 pipelinelight () {
-  state=$1
+  stage=$1
+  state=$2
   if [[ "$state" == "FAILED" ]]; then
     pipelinefail
     echo -e "\033[91m"
-    figgletize $state $detailtype
+    figgletize $state $detailtype $stage
     echo -e "\033[0m"
   fi
   if [[ "$state" == "STARTED" ]]; then
     pipelinestart
     echo -e "\033[94m"
-    figgletize $state $detailtype
+    figgletize $state $detailtype $stage
     echo -e "\033[0m"
   fi
   if [[ "$state" == "SUCCEEDED" ]]; then
     pipelinesucceeded
     echo -e "\033[92m"
-    figgletize "SUCCESS" $detailtype
+    figgletize "SUCCESS" $detailtype $stage
     echo -e "\033[0m"
   fi
 }
@@ -55,14 +58,16 @@ do
   msg2=$(echo $msg2 |sed "s/detail-type/detailtype/g")
   echo $msg2 |jq .
   detailtype=$(echo $msg2 |jq .detailtype |sed "s/[\"\']//g")
+  stage=$(echo $msg2 |jq .detail.stage |sed "s/[\"\']//g")
   state=$(echo $msg2 |jq .detail.state |sed "s/[\"\']//g")
+
   #echo "detail-type:" $detailtype
   #echo "state:" $state
   if [[ "$state" == "FAILED" ]] || [[ "$state" == "STARTED" ]] || [[ "$state" == "SUCCEEDED" ]]; then
     echo "=$previousstate=" ---- "=$state=" 
     if [[ $state != $previousstate ]]; then
       #echo STATES ARE DIFFERENT, TRIGERRING LAMP WITH $state
-      pipelinelight $state
+      pipelinelight $stage $state
       previousstate=$(echo $state)
     fi
   fi
