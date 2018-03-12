@@ -22,9 +22,9 @@ figgletize () {
   state=$1
   detailtype=$2
   stage=$3
-  figlet -f doh.flf -w 180 $stage |head -n 17 |sed -n '2!p'
-  figlet -f doh.flf -w 180 $state |head -n 19 |sed -n '3!p'
-  echo "Change:" $detailtype
+  figlet -f doh.flf -w 180 $stage |head -n 19 |sed -n '2!p'
+  figlet -f doh.flf -w 180 $state |head -n 19 |sed -n '2!p'
+  #echo "Change:" $detailtype
   #echo "State:" $state
 }
 
@@ -56,7 +56,7 @@ do
   msg2=${msg#"\""}
   msg2=${msg2%"\""}
   msg2=$(echo $msg2 |sed "s/detail-type/detailtype/g")
-  echo $msg2 |jq .
+  #echo $msg2 |jq .
   detailtype=$(echo $msg2 |jq .detailtype |sed "s/[\"\']//g")
   stage=$(echo $msg2 |jq .detail.stage |sed "s/[\"\']//g")
   state=$(echo $msg2 |jq .detail.state |sed "s/[\"\']//g")
