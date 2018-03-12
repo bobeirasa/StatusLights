@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/zsh
 
 # SQS Queue URL
 queueurl='https://sqs.us-west-2.amazonaws.com/764112847618/CPQ-debug'
@@ -9,10 +9,10 @@ alias blue='tplight hsb 172.20.10.8 230 100 100'
 alias green='tplight hsb 172.20.10.8 110 100 100'
 alias off='tplight off 172.20.10.8'
 alias on='tplight on 172.20.10.8'
-alias pipelinestart='blue'
+alias pipelinestart=blue
 alias pipelinemove=pipelinestart
-alias pipelinefail='red'
-alias pipelinesucceeded='green'
+alias pipelinefail=red
+alias pipelinesucceeded=green
 
 # Script execution starts here...
 
@@ -30,19 +30,19 @@ do
   #echo "detail-type:" $detailtype
   #echo "state:" $state
   
-  if [ "$state" == "FAILED" ]; then
+  if [[ "$state" == "FAILED" ]]; then
     echo "\033[91mChange:" $detailtype
     echo "State:" $state
     echo 'Pipeline FAILED - changing bulb behavior\033[0m'
     pipelinefail
   fi
-  if [ "$state" == "STARTED" ]; then
+  if [[ "$state" == "STARTED" ]]; then
     echo "\033[94mChange:" $detailtype
     echo "State:" $state
     echo 'Pipeline STARTED - changing bulb behavior\033[0m'
     pipelinestart
   fi
-  if [ "$state" == "SUCCEEDED" ]; then
+  if [[ "$state" == "SUCCEEDED" ]]; then
     echo "\033[92mChange:" $detailtype
     echo "State:" $state
     echo 'Pipeline SUCCEEDED - changing bulb behavior\033[0m'
@@ -50,32 +50,3 @@ do
   fi
   sleep 1
 done
-
-Full msg:
-{
-  "version": "0",
-  "id": "CWE-event-id",
-  "detail-type": "CodePipeline Pipeline Execution State Change",
-  "source": "aws.codepipeline",
-  "account": "123456789012",
-  "time": "2017-04-22T03:31:47Z",
-  "region": "us-east-1",
-  "resources": [
-    "arn:aws:codepipeline:us-east-1:123456789012:pipeline:myPipeline"
-  ],
-  "detail": {
-    "pipeline": "myPipeline",
-    "version": "1",
-    "state": "STARTED",
-    "execution-id": "01234567-0123-0123-0123-012345678901"
-  }
-}
-
-
-#Possible statuses:
-#CANCELLED
-#FAILED
-#RESUMED
-#STARTED
-#SUCCEEDED
-#SUPERSEDED
