@@ -1,0 +1,85 @@
+tplight details 172.20.10.8                                                                master ✚ 1 … 2  1
+{
+  "sw_ver": "1.7.1 Build 171109 Rel.163935",
+  "hw_ver": "1.0",
+  "model": "LB130(US)",
+  "description": "Smart Wi-Fi LED Bulb with Color Changing",
+  "alias": "1",
+  "mic_type": "IOT.SMARTBULB",
+  "dev_state": "normal",
+  "mic_mac": "50C7BF6DEA37",
+  "deviceId": "8012FFF7475569AADAD62FB4602E7EB418762D1E",
+  "oemId": "05BF7B3BE1675C5A6867B7A7E4C9F6F7",
+  "hwId": "111E35908497A05512E259BB76801E10",
+  "is_factory": false,
+  "disco_ver": "1.0",
+  "ctrl_protocols": {
+    "name": "Linkie",
+    "version": "1.0"
+  },
+  "light_state": {
+    "on_off": 1,
+    "mode": "normal",
+    "hue": 326,
+    "saturation": 54,
+    "color_temp": 0,
+    "brightness": 100
+  },
+  "is_dimmable": 1,
+  "is_color": 1,
+  "is_variable_color_temp": 1,
+  "preferred_state": [
+    {
+      "index": 0,
+      "hue": 0,
+      "saturation": 0,
+      "color_temp": 2700,
+      "brightness": 50
+    },
+    {
+      "index": 1,
+      "hue": 0,
+      "saturation": 75,
+      "color_temp": 0,
+      "brightness": 100
+    },
+    {
+      "index": 2,
+      "hue": 120,
+      "saturation": 75,
+      "color_temp": 0,
+      "brightness": 100
+    },
+    {
+      "index": 3,
+      "hue": 240,
+      "saturation": 75,
+      "color_temp": 0,
+      "brightness": 100
+    }
+  ],
+  "rssi": -64,
+  "active_mode": "none",
+  "heapsize": 287536,
+  "err_code": 0,
+  "lamp_beam_angle": 150,
+  "min_voltage": 110,
+  "max_voltage": 120,
+  "wattage": 10,
+  "incandescent_equivalent": 60,
+  "max_lumens": 800,
+  "color_rendering_index": 80
+}
+
+
+
+
+
+alias red='tplight hsb 172.20.10.8 360 100 100'
+alias blue='tplight hsb 172.20.10.8 230 100 100'
+alias green='tplight hsb 172.20.10.8 110 100 100'
+alias off='tplight off 172.20.10.8'
+alias on='tplight on 172.20.10.8'
+alias pipelinefail='red && sleep 10 && off'
+alias pipelineok='green && sleep 1 && off'
+
