@@ -29,22 +29,22 @@ figgletize () {
 pipelinelight () {
   state=$1
   if [[ "$state" == "FAILED" ]]; then
-    #pipelinefail
+    pipelinefail
     echo -e "\033[91m"
     figgletize $state $detailtype
     echo -e "\033[0m"
   fi
   if [[ "$state" == "STARTED" ]]; then
+    pipelinestart
     echo -e "\033[94m"
     figgletize $state $detailtype
     echo -e "\033[0m"
-    #pipelinestart
   fi
   if [[ "$state" == "SUCCEEDED" ]]; then
+    pipelinesucceeded
     echo -e "\033[92m"
     figgletize "SUCCESS" $detailtype
     echo -e "\033[0m"
-    #pipelinesucceeded
   fi
 }
 while true
