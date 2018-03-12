@@ -21,7 +21,7 @@ alias pipelinesucceeded=green
 figgletize () {
   state=$1
   detailtype=$2
-  figlet -f doh.flf -w 180 $state |head -n 19 |sed -n '1!p'
+  figlet -f doh.flf -w 180 $state |head -n 19 |sed -n '2!p'
   echo "Change:" $detailtype
   #echo "State:" $state
 }
@@ -53,11 +53,19 @@ do
   msg2=${msg#"\""}
   msg2=${msg2%"\""}
   msg2=$(echo $msg2 |sed "s/detail-type/detailtype/g")
+  echo $msg2 |jq .
   detailtype=$(echo $msg2 |jq .detailtype |sed "s/[\"\']//g")
   state=$(echo $msg2 |jq .detail.state |sed "s/[\"\']//g")
   #echo "detail-type:" $detailtype
   #echo "state:" $state
-  pipelinelight $state
+  if [[ "$state" == "FAILED" ]] || [[ "$state" == "STARTED" ]] || [[ "$state" == "SUCCEEDED" ]]; then
+    echo "=$previousstate=" ---- "=$state=" 
+    if [[ $state != $previousstate ]]; then
+      #echo STATES ARE DIFFERENT, TRIGERRING LAMP WITH $state
+      pipelinelight $state
+      previousstate=$(echo $state)
+    fi
+  fi
   sleep 1
 done
 
